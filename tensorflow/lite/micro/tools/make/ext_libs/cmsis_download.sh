@@ -42,11 +42,12 @@ if [ ! -d ${DOWNLOADS_DIR} ]; then
 fi
 
 DOWNLOADED_CMSIS_PATH=${DOWNLOADS_DIR}/cmsis
+# CMSIS DSP lives in its own repo now
+DOWNLOADED_CMSIS_DSP_PATH=${DOWNLOADS_DIR}/cmsis/CMSIS/DSP
 
 if [ -d ${DOWNLOADED_CMSIS_PATH} ]; then
   echo >&2 "${DOWNLOADED_CMSIS_PATH} already exists, skipping the download."
 else
-
   ZIP_PREFIX="dde5bac01b1b0b5ef528989a3139ce10bb1b054d"
   CMSIS_URL="http://github.com/ARM-software/CMSIS_5/archive/${ZIP_PREFIX}.zip"
   CMSIS_MD5="00cc7ce80ace3d074deaa2c07d9c5c3b"
@@ -58,6 +59,24 @@ else
 
   unzip -qo /tmp/${ZIP_PREFIX}.zip -d /tmp >&2
   mv /tmp/CMSIS_5-${ZIP_PREFIX} ${DOWNLOADED_CMSIS_PATH}
+  rm -rf $DOWNLOADED_CMSIS_DSP_PATH
 fi
+
+if [ -d ${DOWNLOADED_CMSIS_DSP_PATH} ]; then
+  echo >&2 "${DOWNLOADED_CMSIS_DSP_PATH} already exists, skipping the download."
+else
+  ZIP_PREFIX="b8177102d9a4aaf83fd3f067364ecfa3100966c2"
+  CMSIS_DSP_URL="https://github.com/ARM-software/CMSIS-DSP/archive/${ZIP_PREFIX}.zip"
+  # CMSIS_DSP_MD5="00cc7ce80ace3d074deaa2c07d9c5c3b"
+
+  # wget is much faster than git clone of the entire repo. So we wget a specific
+  # version and can then apply a patch, as needed.
+  wget ${CMSIS_DSP_URL} -O /tmp/${ZIP_PREFIX}.zip >&2
+  # check_md5 /tmp/${ZIP_PREFIX}.zip ${CMSIS_MD5}
+
+  unzip -qo /tmp/${ZIP_PREFIX}.zip -d /tmp >&2
+  mv /tmp/CMSIS-DSP-${ZIP_PREFIX} ${DOWNLOADED_CMSIS_DSP_PATH}
+fi
+
 
 echo "SUCCESS"
