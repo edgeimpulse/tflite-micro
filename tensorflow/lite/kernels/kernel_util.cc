@@ -14,6 +14,14 @@ limitations under the License.
 ==============================================================================*/
 #include "tensorflow/lite/kernels/kernel_util.h"
 
+// Patched by Edge Impulse, remove these declarations for Eta Compute
+#ifdef ECM3532
+#undef _GLIBCXX_HAVE_ENOTSUP
+#undef _GLIBCXX_HAVE_ECANCELED
+#undef _GLIBCXX_HAVE_EOWNERDEAD
+#undef _GLIBCXX_HAVE_ENOTRECOVERABLE
+#endif
+
 #include <stdint.h>
 #include <stdlib.h>
 
@@ -436,8 +444,11 @@ TfLiteStatus GetOutputShapeFromInput(TfLiteContext* context,
 // that build. What appears to be happening is that while the linker drops the
 // unsused function, the string library that gets pulled in is not dropped,
 // resulting in the increased binary size.
+// Patched by Edge Impulse, issues with building for TinkerGen
+// TODO inspect if we still need this
 const std::string GetShapeDebugString(const TfLiteIntArray* shape) {
-  std::string str;
+  std::string str = "GetShapeDebugString";;
+  /*
   for (int d = 0; d < shape->size; ++d) {
     if (str.empty())
       str = "[" + std::to_string(shape->data[d]);
@@ -451,6 +462,7 @@ const std::string GetShapeDebugString(const TfLiteIntArray* shape) {
   } else {
     str += "]";
   }
+  */
   return str;
 }
 

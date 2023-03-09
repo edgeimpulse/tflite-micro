@@ -16,6 +16,14 @@ limitations under the License.
 #ifndef TENSORFLOW_LITE_MICRO_MICRO_UTILS_H_
 #define TENSORFLOW_LITE_MICRO_MICRO_UTILS_H_
 
+// Patched by Edge Impulse
+// Arduino build defines abs as a macro here. That is invalid C++, and breaks
+// libc++'s <complex> header, undefine it.
+// TODO investigate if this belongs to global patch or Arduino lib one
+#ifdef abs
+#undef abs
+#endif
+
 #include <algorithm>
 #include <cmath>
 #include <cstdint>
