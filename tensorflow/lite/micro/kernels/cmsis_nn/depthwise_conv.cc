@@ -342,6 +342,11 @@ TfLiteStatus Eval(TfLiteContext* context, TfLiteNode* node) {
 
   switch (input->type) {  // Already know in/out types are same.
     case kTfLiteFloat32: {
+#if EI_TFLITE_DISABLE_DEPTHWISE_CONV_2D_IN_F32
+      MicroPrintf("Type %s (%d) not supported.", TfLiteTypeGetName(input->type),
+                  input->type);
+      return kTfLiteError;
+#endif
       tflite::reference_ops::DepthwiseConv(
           DepthwiseConvParamsFloat(params, data.reference_op_data),
           tflite::micro::GetTensorShape(input),
@@ -355,6 +360,11 @@ TfLiteStatus Eval(TfLiteContext* context, TfLiteNode* node) {
       break;
     }
     case kTfLiteInt8:
+#if EI_TFLITE_DISABLE_DEPTHWISE_CONV_2D_IN_I8
+      MicroPrintf("Type %s (%d) not supported.", TfLiteTypeGetName(input->type),
+                  input->type);
+      return kTfLiteError;
+#endif
       switch (filter_int8.type) {
         case kTfLiteInt8: {
           EvalQuantizedPerChannel(context, node, params, data, input,

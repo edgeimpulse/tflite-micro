@@ -85,6 +85,11 @@ TfLiteStatus SoftmaxEval(TfLiteContext* context, TfLiteNode* node) {
 
   switch (input->type) {
     case kTfLiteFloat32: {
+#if EI_TFLITE_DISABLE_SOFTMAX_IN_F32
+      MicroPrintf("Type %s (%d) not supported.", TfLiteTypeGetName(input->type),
+                  input->type);
+      return kTfLiteError;
+#endif
       tflite::reference_ops::Softmax(
           op_data.softmax_params, tflite::micro::GetTensorShape(input),
           tflite::micro::GetTensorData<float>(input),
@@ -93,6 +98,11 @@ TfLiteStatus SoftmaxEval(TfLiteContext* context, TfLiteNode* node) {
       return kTfLiteOk;
     }
     case kTfLiteInt8: {
+#if EI_TFLITE_DISABLE_SOFTMAX_IN_I8
+      MicroPrintf("Type %s (%d) not supported.", TfLiteTypeGetName(input->type),
+                  input->type);
+      return kTfLiteError;
+#endif
       if (output->type == kTfLiteInt8) {
         arm_softmax_s8(tflite::micro::GetTensorData<int8_t>(input),
                        op_data.num_rows, op_data.row_size,
@@ -111,6 +121,11 @@ TfLiteStatus SoftmaxEval(TfLiteContext* context, TfLiteNode* node) {
       return kTfLiteOk;
     }
     case kTfLiteInt16: {
+#if EI_TFLITE_DISABLE_SOFTMAX_IN_I16
+      MicroPrintf("Type %s (%d) not supported.", TfLiteTypeGetName(input->type),
+                  input->type);
+      return kTfLiteError;
+#endif
       const cmsis_nn_softmax_lut_s16 softmax_params = {
           .exp_lut = op_data.softmax_params.exp_lut,
           .one_by_one_lut = op_data.softmax_params.one_over_one_plus_x_lut};

@@ -40,9 +40,19 @@ TfLiteStatus AverageEval(TfLiteContext* context, TfLiteNode* node) {
   // Inputs and outputs share the same type, guaranteed by the converter.
   switch (input->type) {
     case kTfLiteFloat32:
+#if EI_TFLITE_DISABLE_AVERAGE_POOL_2D_IN_F32
+      MicroPrintf("Type %s (%d) not supported.", TfLiteTypeGetName(input->type),
+                  input->type);
+      return kTfLiteError;
+#endif
       AveragePoolingEvalFloat(context, node, params, data, input, output);
       break;
     case kTfLiteInt8:
+#if EI_TFLITE_DISABLE_AVERAGE_POOL_2D_IN_I8
+      MicroPrintf("Type %s (%d) not supported.", TfLiteTypeGetName(input->type),
+                  input->type);
+      return kTfLiteError;
+#endif
       AveragePoolingEvalQuantized<int8_t>(context, node, params, data, input,
                                           output);
       break;
@@ -73,9 +83,19 @@ TfLiteStatus MaxEval(TfLiteContext* context, TfLiteNode* node) {
 
   switch (input->type) {
     case kTfLiteFloat32:
+#if EI_TFLITE_DISABLE_MAX_POOL_2D_IN_F32
+      MicroPrintf("Type %s (%d) not supported.", TfLiteTypeGetName(input->type),
+                  input->type);
+      return kTfLiteError;
+#endif
       MaxPoolingEvalFloat(context, node, params, data, input, output);
       break;
     case kTfLiteInt8:
+#if EI_TFLITE_DISABLE_MAX_POOL_2D_IN_I8
+      MicroPrintf("Type %s (%d) not supported.", TfLiteTypeGetName(input->type),
+                  input->type);
+      return kTfLiteError;
+#endif
       MaxPoolingEvalQuantized<int8_t>(context, node, params, data, input,
                                       output);
       break;

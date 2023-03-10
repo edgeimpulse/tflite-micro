@@ -209,9 +209,21 @@ TfLiteStatus AverageEval(TfLiteContext* context, TfLiteNode* node) {
 
   // Inputs and outputs share the same type, guaranteed by the converter.
   if (input->type == kTfLiteFloat32) {
+#if EI_TFLITE_DISABLE_AVERAGE_POOL_2D_IN_F32
+      MicroPrintf("Type %s (%d) not supported.", TfLiteTypeGetName(input->type),
+                  input->type);
+      return kTfLiteError;
+#endif
     AveragePoolingEvalFloat(context, node, params, &data.reference_op_data,
                             input, output);
-  } else if (input->type == kTfLiteInt8 || input->type == kTfLiteInt16) {
+  } else if (input->type == kTfLiteInt8) {
+#if EI_TFLITE_DISABLE_AVERAGE_POOL_2D_IN_I8
+      MicroPrintf("Type %s (%d) not supported.", TfLiteTypeGetName(input->type),
+                  input->type);
+      return kTfLiteError;
+#endif
+    AverageEvalQuantized(context, node, params, data, input, output);
+  } else if (input->type == kTfLiteInt16) {
     AverageEvalQuantized(context, node, params, data, input, output);
   } else {
     MicroPrintf("Input type %s is not currently supported",
@@ -270,9 +282,21 @@ TfLiteStatus MaxEval(TfLiteContext* context, TfLiteNode* node) {
       micro::GetEvalOutput(context, node, kPoolingOutputTensor);
 
   if (input->type == kTfLiteFloat32) {
+#if EI_TFLITE_DISABLE_MAX_POOL_2D_IN_F32
+      MicroPrintf("Type %s (%d) not supported.", TfLiteTypeGetName(input->type),
+                  input->type);
+      return kTfLiteError;
+#endif
     MaxPoolingEvalFloat(context, node, params, &data.reference_op_data, input,
                         output);
-  } else if (input->type == kTfLiteInt8 || input->type == kTfLiteInt16) {
+  } else if (input->type == kTfLiteInt8) {
+#if EI_TFLITE_DISABLE_MAX_POOL_2D_IN_I8
+      MicroPrintf("Type %s (%d) not supported.", TfLiteTypeGetName(input->type),
+                  input->type);
+      return kTfLiteError;
+#endif
+    MaxEvalQuantized(context, node, params, data, input, output);
+  } else if (input->type == kTfLiteInt16) {
     MaxEvalQuantized(context, node, params, data, input, output);
   } else {
     MicroPrintf("Input type %s is not currently supported",

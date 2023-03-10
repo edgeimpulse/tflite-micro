@@ -386,15 +386,40 @@ TfLiteStatus EvalQuantized(TfLiteContext* context, TfLiteNode* node,
   op_params.quantized_activation_min = data.output_activation_min;
   op_params.quantized_activation_max = data.output_activation_max;
 
-  reference_integer_ops::FullyConnected(
-      op_params, tflite::micro::GetTensorShape(input),
-      tflite::micro::GetTensorData<int8_t>(input),
-      tflite::micro::GetTensorShape(filter),
-      tflite::micro::GetTensorData<int8_t>(filter),
-      tflite::micro::GetTensorShape(bias),
-      tflite::micro::GetTensorData<int32_t>(bias),
-      tflite::micro::GetTensorShape(output),
-      tflite::micro::GetTensorData<int8_t>(output));
+#define TF_LITE_FULLY_CONNECTED(output_data_type)      \
+  reference_ops::FullyConnected(                       \
+      op_params, tflite::micro::GetTensorShape(input), \
+      tflite::micro::GetTensorData<uint8_t>(input),    \
+      tflite::micro::GetTensorShape(filter),           \
+      tflite::micro::GetTensorData<uint8_t>(filter),   \
+      tflite::micro::GetTensorShape(bias),             \
+      tflite::micro::GetTensorData<int32_t>(bias),     \
+      tflite::micro::GetTensorShape(output))
+
+  switch (output->type) {
+    case kTfLiteUInt8:
+      #if EI_TFLITE_DISABLE_FULLY_CONNECTED_OUT_U8
+      MicroPrintf("Type %s currently not supported.",
+                            TfLiteTypeGetName(filter->type));
+      return kTfLiteError;
+      #endif
+
+      TF_LITE_FULLY_CONNECTED(uint8_t);
+      break;
+    case kTfLiteInt16:
+      #if EI_TFLITE_DISABLE_FULLY_CONNECTED_OUT_I16
+      MicroPrintf("Type %s currently not supported.",
+                            TfLiteTypeGetName(filter->type));
+      return kTfLiteError;
+      #endif
+
+      TF_LITE_FULLY_CONNECTED(int16_t);
+      break;
+    default:
+      MicroPrintf("Type %s (%d) not supported.",
+                         TfLiteTypeGetName(output->type), output->type);
+      return kTfLiteError;
+
   return kTfLiteOk;
 #else
   MicroPrintf("Node configuration is not supported by ARC MLI Library.");
@@ -451,15 +476,36 @@ TfLiteStatus Eval(TfLiteContext* context, TfLiteNode* node) {
   // Checks in Prepare ensure input, output and filter types are all the same.
   switch (input->type) {
     case kTfLiteFloat32:
+      #if EI_TFLITE_DISABLE_FULLY_CONNECTED_IN_F32
+      MicroPrintf("Type %s (%d) not supported.",
+                      TfLiteTypeGetName(input->type), input->type);
+      return kTfLiteError;
+      #endif
+
       return EvalFloat(context, node, params->activation, input, filter, bias,
                        output);
     case kTfLiteInt8:
+      #if EI_TFLITE_DISABLE_FULLY_CONNECTED_IN_I8
+      MicroPrintf("Type %s (%d) not supported.",
+                      TfLiteTypeGetName(input->type), input->type);
+      return kTfLiteError;
+      #endif
+
       if (data.is_mli_applicable) {
         return EvalMliQuantizedInt8(context, node, params, data, input, filter,
                                     bias, output);
       } else {
         return EvalQuantized(context, node, data, input, filter, bias, output);
       }
+
+    case kTfLiteUInt8:
+      #if EI_TFLITE_DISABLE_FULLY_CONNECTED_IN_U8
+      MicroPrintf("Type %s (%d) not supported.",
+                      TfLiteTypeGetName(input->type), input->type);
+      return kTfLiteError;
+      #endif
+
+      return EvalQuantized(context, node, data, input, filter, bias, output);
 
     default:
       MicroPrintf("Type %s (%d) not supported.", TfLiteTypeGetName(input->type),

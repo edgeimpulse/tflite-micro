@@ -325,6 +325,11 @@ TfLiteStatus Eval(TfLiteContext* context, TfLiteNode* node) {
   // Checks in Prepare ensure input, output and filter types are all the same.
   switch (input->type) {
     case kTfLiteFloat32: {
+#if EI_TFLITE_DISABLE_FULLY_CONNECTED_IN_F32
+      MicroPrintf("Type %s (%d) not supported.",
+                      TfLiteTypeGetName(input->type), input->type);
+      return kTfLiteError;
+#endif
       const float* bias_data =
           tflite::micro::GetOptionalTensorData<float>(bias);
       tflite::reference_ops::FullyConnected(
@@ -341,6 +346,11 @@ TfLiteStatus Eval(TfLiteContext* context, TfLiteNode* node) {
     case kTfLiteInt8: {
       switch (filter_int8.type) {
         case kTfLiteInt8:
+#if EI_TFLITE_DISABLE_FULLY_CONNECTED_IN_I8
+        MicroPrintf("Filter data type %s currently not supported.",
+                              TfLiteTypeGetName(filter->type));
+        return kTfLiteError;
+#endif
           return EvalQuantizedInt8(context, node, data, input, &filter_int8,
                                    bias, output);
         default:
