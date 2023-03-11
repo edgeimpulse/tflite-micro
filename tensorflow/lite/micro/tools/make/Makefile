@@ -318,6 +318,7 @@ $(TENSORFLOW_ROOT)tensorflow/lite/micro/kernels/ceil.cc \
 $(TENSORFLOW_ROOT)tensorflow/lite/micro/kernels/circular_buffer.cc \
 $(TENSORFLOW_ROOT)tensorflow/lite/micro/kernels/circular_buffer_common.cc \
 $(TENSORFLOW_ROOT)tensorflow/lite/micro/kernels/comparisons.cc \
+$(TENSORFLOW_ROOT)tensorflow/lite/micro/kernels/complex_abs.cc \
 $(TENSORFLOW_ROOT)tensorflow/lite/micro/kernels/concatenation.cc \
 $(TENSORFLOW_ROOT)tensorflow/lite/micro/kernels/conv.cc \
 $(TENSORFLOW_ROOT)tensorflow/lite/micro/kernels/conv_common.cc \
@@ -371,12 +372,14 @@ $(TENSORFLOW_ROOT)tensorflow/lite/micro/kernels/prelu.cc \
 $(TENSORFLOW_ROOT)tensorflow/lite/micro/kernels/prelu_common.cc \
 $(TENSORFLOW_ROOT)tensorflow/lite/micro/kernels/quantize.cc \
 $(TENSORFLOW_ROOT)tensorflow/lite/micro/kernels/quantize_common.cc \
+$(TENSORFLOW_ROOT)tensorflow/lite/micro/kernels/real.cc \
 $(TENSORFLOW_ROOT)tensorflow/lite/micro/kernels/read_variable.cc \
 $(TENSORFLOW_ROOT)tensorflow/lite/micro/kernels/reduce.cc \
 $(TENSORFLOW_ROOT)tensorflow/lite/micro/kernels/reduce_common.cc \
 $(TENSORFLOW_ROOT)tensorflow/lite/micro/kernels/reshape.cc \
 $(TENSORFLOW_ROOT)tensorflow/lite/micro/kernels/resize_bilinear.cc \
 $(TENSORFLOW_ROOT)tensorflow/lite/micro/kernels/resize_nearest_neighbor.cc \
+$(TENSORFLOW_ROOT)tensorflow/lite/micro/kernels/rfft2d.cc \
 $(TENSORFLOW_ROOT)tensorflow/lite/micro/kernels/round.cc \
 $(TENSORFLOW_ROOT)tensorflow/lite/micro/kernels/select.cc \
 $(TENSORFLOW_ROOT)tensorflow/lite/micro/kernels/shape.cc \

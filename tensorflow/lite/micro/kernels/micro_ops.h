@@ -43,6 +43,7 @@ TfLiteRegistration Register_BROADCAST_TO();
 TfLiteRegistration Register_CALL_ONCE();
 TfLiteRegistration Register_CAST();
 TfLiteRegistration Register_CEIL();
+TfLiteRegistration Register_COMPLEX_ABS();
 // TODO(b/160234179): Change custom OPs to also return by value.
 TfLiteRegistration* Register_CIRCULAR_BUFFER();
 TfLiteRegistration Register_CONCATENATION();
@@ -62,11 +63,14 @@ TfLiteRegistration Register_FLOOR();
 TfLiteRegistration Register_FLOOR_DIV();
 TfLiteRegistration Register_FLOOR_MOD();
 TfLiteRegistration Register_FULLY_CONNECTED();
+#ifndef TF_LITE_STATIC_MEMORY
 TfLiteRegistration Register_GATHER();
+#endif // TF_LITE_STATIC_MEMORY
 TfLiteRegistration Register_GATHER_ND();
 TfLiteRegistration Register_GREATER();
 TfLiteRegistration Register_GREATER_EQUAL();
 TfLiteRegistration Register_HARD_SWISH();
+TfLiteRegistration Register_IMAG();
 TfLiteRegistration Register_IF();
 TfLiteRegistration Register_L2_POOL_2D();
 TfLiteRegistration Register_LEAKY_RELU();
@@ -90,11 +94,16 @@ TfLiteRegistration Register_PADV2();
 TfLiteRegistration Register_PRELU();
 TfLiteRegistration Register_QUANTIZE();
 TfLiteRegistration Register_READ_VARIABLE();
+TfLiteRegistration Register_REAL();
 TfLiteRegistration Register_REDUCE_MAX();
 TfLiteRegistration Register_RELU();
 TfLiteRegistration Register_RELU6();
 TfLiteRegistration Register_RESIZE_BILINEAR();
+TfLiteRegistration Register_RFFT2D();
+#ifndef TF_LITE_STATIC_MEMORY
+TfLiteRegistration Register_SELECT();
 TfLiteRegistration Register_SELECT_V2();
+#endif // TF_LITE_STATIC_MEMORY
 TfLiteRegistration Register_SHAPE();
 TfLiteRegistration Register_SLICE();
 TfLiteRegistration Register_SOFTMAX();

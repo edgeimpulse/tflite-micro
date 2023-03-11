@@ -12,6 +12,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 ==============================================================================*/
+#ifndef TF_LITE_STATIC_MEMORY
 
 #include "tensorflow/lite/c/builtin_op_data.h"
 #include "tensorflow/lite/c/common.h"
@@ -222,3 +223,4 @@ TfLiteRegistration Register_GATHER() {
 }
 
 }  // namespace tflite
+#endif // TF_LITE_STATIC_MEMORY

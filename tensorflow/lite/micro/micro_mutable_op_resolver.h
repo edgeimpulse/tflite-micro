@@ -171,6 +171,11 @@ class MicroMutableOpResolver : public MicroOpResolver {
     return AddBuiltin(BuiltinOperator_CEIL, Register_CEIL(), ParseCeil);
   }
 
+  TfLiteStatus AddComplexAbs() {
+    return AddBuiltin(BuiltinOperator_COMPLEX_ABS, Register_COMPLEX_ABS(),
+                      ParseComplexAbs);
+  }
+
   TfLiteStatus AddCircularBuffer() {
     return AddCustom("CIRCULAR_BUFFER", tflite::Register_CIRCULAR_BUFFER());
   }
@@ -269,10 +274,12 @@ class MicroMutableOpResolver : public MicroOpResolver {
                       ParseFullyConnected);
   }
 
+#ifndef TF_LITE_STATIC_MEMORY
   TfLiteStatus AddGather() {
     return AddBuiltin(BuiltinOperator_GATHER, tflite::Register_GATHER(),
                       ParseGather);
   }
+#endif
 
   TfLiteStatus AddGatherNd() {
     return AddBuiltin(BuiltinOperator_GATHER_ND, tflite::Register_GATHER_ND(),
@@ -292,6 +299,11 @@ class MicroMutableOpResolver : public MicroOpResolver {
   TfLiteStatus AddHardSwish() {
     return AddBuiltin(BuiltinOperator_HARD_SWISH, tflite::Register_HARD_SWISH(),
                       ParseHardSwish);
+  }
+
+  TfLiteStatus AddImag() {
+    return AddBuiltin(BuiltinOperator_IMAG, Register_IMAG(),
+                      ParseImag);
   }
 
   TfLiteStatus AddIf() {
@@ -413,6 +425,11 @@ class MicroMutableOpResolver : public MicroOpResolver {
                       ParseQuantize);
   }
 
+  TfLiteStatus AddReal() {
+    return AddBuiltin(BuiltinOperator_REAL, Register_REAL(),
+                      ParseReal);
+  }
+
   TfLiteStatus AddReadVariable() {
     return AddBuiltin(BuiltinOperator_READ_VARIABLE,
                       tflite::Register_READ_VARIABLE(), ParseReadVariable);
@@ -448,6 +465,11 @@ class MicroMutableOpResolver : public MicroOpResolver {
                       ParseResizeNearestNeighbor);
   }
 
+  TfLiteStatus AddRfft2D() {
+    return AddBuiltin(BuiltinOperator_RFFT2D, Register_RFFT2D(),
+                      ParseRfft2D);
+  }
+
   TfLiteStatus AddRound() {
     return AddBuiltin(BuiltinOperator_ROUND,
                       tflite::ops::micro::Register_ROUND(), ParseRound);
@@ -458,10 +480,17 @@ class MicroMutableOpResolver : public MicroOpResolver {
                       tflite::ops::micro::Register_RSQRT(), ParseRsqrt);
   }
 
+#ifndef TF_LITE_STATIC_MEMORY
+  TfLiteStatus AddSelect() {
+    return AddBuiltin(BuiltinOperator_SELECT, Register_SELECT(),
+                      ParseSelect);
+  }
+
   TfLiteStatus AddSelectV2() {
     return AddBuiltin(BuiltinOperator_SELECT_V2, Register_SELECT_V2(),
-                      ParseSelectV2);
+                      ParseSelect);
   }
+#endif // TF_LITE_STATIC_MEMORY
 
   TfLiteStatus AddShape() {
     return AddBuiltin(BuiltinOperator_SHAPE, Register_SHAPE(), ParseShape);

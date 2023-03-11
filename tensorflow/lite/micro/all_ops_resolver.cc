@@ -34,6 +34,7 @@ AllOpsResolver::AllOpsResolver() {
   AddCallOnce();
   AddCast();
   AddCeil();
+  AddComplexAbs();
   AddCircularBuffer();
   AddConcatenation();
   AddConv2D();
@@ -54,11 +55,15 @@ AllOpsResolver::AllOpsResolver() {
   AddFloorDiv();
   AddFloorMod();
   AddFullyConnected();
+#ifndef TF_LITE_STATIC_MEMORY
+  AddGather();
+#endif // TF_LITE_STATIC_MEMORY
   AddGather();
   AddGatherNd();
   AddGreater();
   AddGreaterEqual();
   AddHardSwish();
+  AddImag();
   AddIf();
   AddL2Normalization();
   AddL2Pool2D();
@@ -93,7 +98,10 @@ AllOpsResolver::AllOpsResolver() {
   AddResizeNearestNeighbor();
   AddRound();
   AddRsqrt();
+#ifndef TF_LITE_STATIC_MEMORY
+  AddSelect();
   AddSelectV2();
+#endif // TF_LITE_STATIC_MEMORY
   AddShape();
   AddSin();
   AddSlice();
