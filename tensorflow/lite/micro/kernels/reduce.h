@@ -40,7 +40,7 @@ struct OpDataReduce {
   int num_axis;
 };
 
-TfLiteStatus PrepareMaxHelper(TfLiteContext* context, TfLiteNode* node,
+TfLiteStatus PrepareMinMaxHelper(TfLiteContext* context, TfLiteNode* node,
                               OpDataReduce* op_data);
 
 TfLiteStatus PrepareMeanOrSumHelper(TfLiteContext* context, TfLiteNode* node,
@@ -48,8 +48,13 @@ TfLiteStatus PrepareMeanOrSumHelper(TfLiteContext* context, TfLiteNode* node,
 
 TfLiteStatus EvalMaxHelper(TfLiteContext* context, TfLiteNode* node,
                            OpDataReduce* op_data);
+
+TfLiteStatus EvalMinHelper(TfLiteContext* context, TfLiteNode* node,
+                           OpDataReduce* op_data);
+
 TfLiteStatus EvalMeanHelper(TfLiteContext* context, TfLiteNode* node,
                             OpDataReduce* op_data);
+
 TfLiteStatus EvalSumHelper(TfLiteContext* context, TfLiteNode* node,
                            OpDataReduce* op_data);
 
@@ -58,6 +63,7 @@ void ReduceResolveAxis(const int* axis_data, int axis_count,
 
 TfLiteRegistration Register_MEAN();
 TfLiteRegistration Register_REDUCE_MAX();
+TfLiteRegistration Register_REDUCE_MIN();
 TfLiteRegistration Register_SUM();
 
 }  // namespace tflite

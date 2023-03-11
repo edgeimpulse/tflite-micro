@@ -96,6 +96,7 @@ TfLiteRegistration Register_QUANTIZE();
 TfLiteRegistration Register_READ_VARIABLE();
 TfLiteRegistration Register_REAL();
 TfLiteRegistration Register_REDUCE_MAX();
+TfLiteRegistration Register_REDUCE_MIN();
 TfLiteRegistration Register_RELU();
 TfLiteRegistration Register_RELU6();
 TfLiteRegistration Register_RESIZE_BILINEAR();
