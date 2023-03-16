@@ -44,7 +44,7 @@ class MicroGraph {
 
   // Calls TfLiteRegistration->Prepare for every operator in every subgraph in
   // the model.
-  virtual TfLiteStatus PrepareSubgraphs();
+  virtual TfLiteStatus PrepareSubgraphs(bool run_all_prep_ops);
 
   // Calls TfLiteRegistration->Free for every operator in every subgraph in the
   // model.

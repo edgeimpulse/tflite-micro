@@ -86,8 +86,9 @@ TfLiteStatus MicroGraph::InitSubgraphs() {
   return kTfLiteOk;
 }
 
-TfLiteStatus MicroGraph::PrepareSubgraphs() {
+TfLiteStatus MicroGraph::PrepareSubgraphs(bool run_all_prep_ops) {
   int previous_subgraph_idx = current_subgraph_index_;
+  bool all_prep_ops_ok = true;
 
   for (size_t subgraph_idx = 0; subgraph_idx < subgraphs_->size();
        subgraph_idx++) {
@@ -105,11 +106,20 @@ TfLiteStatus MicroGraph::PrepareSubgraphs() {
         if (prepare_status != kTfLiteOk) {
           MicroPrintf("Node %s (number %df) failed to prepare with status %d",
                       OpNameFromRegistration(registration), i, prepare_status);
-          return kTfLiteError;
+
+          all_prep_ops_ok = false;
+          if (!run_all_prep_ops) {
+            return kTfLiteError;
+          }
         }
       }
       allocator_->FinishPrepareNodeAllocations(/*node_id=*/i);
     }
+
+    if (!all_prep_ops_ok) {
+      return kTfLiteError;
+    }
+
   }
   current_subgraph_index_ = previous_subgraph_idx;
 

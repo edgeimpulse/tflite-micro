@@ -191,7 +191,7 @@ TfLiteStatus MicroInterpreter::PrepareNodeAndRegistrationDataFromFlatbuffer() {
   return kTfLiteOk;
 }
 
-TfLiteStatus MicroInterpreter::AllocateTensors() {
+TfLiteStatus MicroInterpreter::AllocateTensors(bool run_all_prep_ops) {
   SubgraphAllocations* allocations = allocator_.StartModelAllocation(model_);
 
   if (allocations == nullptr) {
@@ -218,7 +218,7 @@ TfLiteStatus MicroInterpreter::AllocateTensors() {
   // external_context become available in Prepare stage.
   context_.GetExternalContext = MicroContextGetExternalContext;
 
-  TF_LITE_ENSURE_STATUS(graph_.PrepareSubgraphs());
+  TF_LITE_ENSURE_STATUS(graph_.PrepareSubgraphs(run_all_prep_ops));
 
   // Prepare is done, we're ready for Invoke. Memory allocation is no longer
   // allowed. Kernels can only fetch scratch buffers via GetScratchBuffer.

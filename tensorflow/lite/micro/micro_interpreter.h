@@ -66,7 +66,7 @@ class MicroInterpreter {
 
   // Runs through the model and allocates all necessary input, output and
   // intermediate tensors.
-  TfLiteStatus AllocateTensors();
+  TfLiteStatus AllocateTensors(bool run_all_prep_ops);
 
   // In order to support partial graph runs for strided models, this can return
   // values other than kTfLiteOk and kTfLiteError.
