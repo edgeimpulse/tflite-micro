@@ -74,6 +74,18 @@ MicroInterpreter::~MicroInterpreter() {
   if (graph_.GetAllocations() != nullptr) {
     graph_.FreeSubgraphs();
   }
+  if (node_and_registrations_ != nullptr) {
+    for (size_t i = 0; i < model_->subgraphs()->Get(0)->operators()->size(); ++i) {
+      TfLiteNode* node = &(node_and_registrations_[i].node);
+      const TfLiteRegistration* registration =
+          node_and_registrations_[i].registration;
+      // registration is allocated outside the interpreter, so double check to
+      // make sure it's not nullptr;
+      if (registration != nullptr && registration->free != nullptr) {
+        registration->free(&context_, node->user_data);
+      }
+    }
+  }
 }
 
 void MicroInterpreter::Init(MicroProfilerInterface* profiler) {
@@ -301,6 +313,17 @@ TfLiteTensor* MicroInterpreter::output(size_t index) {
   }
   return output_tensors_[index];
 }
+
+TfLiteTensor* MicroInterpreter::tensor(size_t index) {
+  const size_t length = tensors_size();
+  if (index >= length) {
+    MicroPrintf("Tensor index %d out of range (length is %d)", index, length);
+    return nullptr;
+  }
+  return allocator_.AllocatePersistentTfLiteTensor(model_, graph_.GetAllocations(), index, 0);
+}
+
+
 // Repurposing free subgraphs to reset state for some ops for now
 // will reset api is made. See b/220940833#comment25 for more context.
 TfLiteStatus MicroInterpreter::Reset() {

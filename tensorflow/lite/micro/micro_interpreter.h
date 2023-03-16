@@ -79,6 +79,19 @@ class MicroInterpreter {
   // one external context.
   TfLiteStatus SetMicroExternalContext(void* external_context_payload);
 
+  size_t tensors_size() const { return model_->subgraphs()->Get(0)->tensors()->size(); }
+
+  TfLiteTensor* tensor(size_t tensor_index);
+  template <class T>
+  T* typed_tensor(int tensor_index) {
+    if (TfLiteTensor* tensor_ptr = tensor(tensor_index)) {
+      if (tensor_ptr->type == typeToTfLiteType<T>()) {
+        return GetTensorData<T>(tensor_ptr);
+      }
+    }
+    return nullptr;
+  }
+
   TfLiteTensor* input(size_t index);
   size_t inputs_size() const {
     return model_->subgraphs()->Get(0)->inputs()->size();
@@ -121,6 +134,13 @@ class MicroInterpreter {
 
   TfLiteStatus initialization_status() const { return initialization_status_; }
 
+  size_t operators_size() const { return model_->subgraphs()->Get(0)->operators()->size(); }
+
+  // For debugging only.
+  const NodeAndRegistration node_and_registration(int node_index) const {
+    return node_and_registrations_[node_index];
+  }
+
   // Populates node and registration pointers representing the inference graph
   // of the model from values inside the flatbuffer (loaded from the TfLiteModel
   // instance). Persistent data (e.g. operator data) is allocated from the
@@ -143,6 +163,8 @@ class MicroInterpreter {
   // TODO(b/158263161): Consider switching to Create() function to enable better
   // error reporting during initialization.
   void Init(MicroProfilerInterface* profiler);
+
+  NodeAndRegistration* node_and_registrations_ = nullptr;
 
   // Gets the current subgraph index used from within context methods.
   int get_subgraph_index() { return graph_.GetCurrentSubgraphIndex(); }
