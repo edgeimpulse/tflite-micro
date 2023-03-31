@@ -59,7 +59,6 @@ AllOpsResolver::AllOpsResolver() {
 #ifndef TF_LITE_STATIC_MEMORY
   AddGather();
 #endif // TF_LITE_STATIC_MEMORY
-  AddGather();
   AddGatherNd();
   AddGreater();
   AddGreaterEqual();

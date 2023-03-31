@@ -74,6 +74,7 @@ MicroInterpreter::~MicroInterpreter() {
   if (graph_.GetAllocations() != nullptr) {
     graph_.FreeSubgraphs();
   }
+#ifdef EON_COMPILER_RUN
   if (node_and_registrations_ != nullptr) {
     for (size_t i = 0; i < model_->subgraphs()->Get(0)->operators()->size(); ++i) {
       TfLiteNode* node = &(node_and_registrations_[i].node);
@@ -86,6 +87,7 @@ MicroInterpreter::~MicroInterpreter() {
       }
     }
   }
+#endif
 }
 
 void MicroInterpreter::Init(MicroProfilerInterface* profiler) {
@@ -277,6 +279,10 @@ TfLiteStatus MicroInterpreter::AllocateTensors(bool run_all_prep_ops) {
   }
 
   TF_LITE_ENSURE_STATUS(Reset());
+
+#ifdef EON_COMPILER_RUN
+  node_and_registrations_ = allocations->node_and_registrations;
+#endif
 
   tensors_allocated_ = true;
   return kTfLiteOk;

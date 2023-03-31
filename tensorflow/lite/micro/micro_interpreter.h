@@ -136,10 +136,13 @@ class MicroInterpreter {
 
   size_t operators_size() const { return model_->subgraphs()->Get(0)->operators()->size(); }
 
-  // For debugging only.
+#ifdef EON_COMPILER_RUN
+  NodeAndRegistration* node_and_registrations_ = nullptr;
+
   const NodeAndRegistration node_and_registration(int node_index) const {
     return node_and_registrations_[node_index];
   }
+#endif
 
   // Populates node and registration pointers representing the inference graph
   // of the model from values inside the flatbuffer (loaded from the TfLiteModel
@@ -163,8 +166,6 @@ class MicroInterpreter {
   // TODO(b/158263161): Consider switching to Create() function to enable better
   // error reporting during initialization.
   void Init(MicroProfilerInterface* profiler);
-
-  NodeAndRegistration* node_and_registrations_ = nullptr;
 
   // Gets the current subgraph index used from within context methods.
   int get_subgraph_index() { return graph_.GetCurrentSubgraphIndex(); }
