@@ -144,7 +144,7 @@ TfLiteStatus CalculateOpData(TfLiteContext* context, TfLiteNode* node,
   TfLiteTensor* filter =
       micro_context->AllocateTempInputTensor(node, kFilterTensor);
   TfLiteTensor* bias =
-      micro_context->AllocateTempInputTensor(context, node, kBiasTensor);
+      micro_context->AllocateTempInputTensor(node, kBiasTensor);
   TfLiteTensor* output =
       micro_context->AllocateTempOutputTensor(node, kOutputTensor);
 
@@ -188,7 +188,7 @@ TfLiteStatus Prepare(TfLiteContext* context, TfLiteNode* node) {
   TfLiteTensor* filter =
       micro_context->AllocateTempInputTensor(node, kFilterTensor);
   TfLiteTensor* bias =
-      micro_context->AllocateTempInputTensor(context, node, kBiasTensor);
+      micro_context->AllocateTempInputTensor(node, kBiasTensor);
 
   int input_width = input->dims->data[2];
   int input_height = input->dims->data[1];

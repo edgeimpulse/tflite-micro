@@ -140,7 +140,7 @@ TfLiteStatus CalculateOpData(TfLiteContext* context, TfLiteNode* node,
   TfLiteTensor* filter =
       micro_context->AllocateTempInputTensor(node, kFilterTensor);
   TfLiteTensor* bias =
-      micro_context->AllocateTempInputTensor(context, node, kBiasTensor);
+      micro_context->AllocateTempInputTensor(node, kBiasTensor);
   TfLiteTensor* output =
       micro_context->AllocateTempOutputTensor(node, kOutputTensor);
 
@@ -176,12 +176,12 @@ TfLiteStatus Prepare(TfLiteContext* context, TfLiteNode* node) {
       reinterpret_cast<TfLiteDepthwiseConvParams*>(node->builtin_data);
   OpData* data = static_cast<OpData*>(node->user_data);
 
-  TfLiteTensor* output = AllocateTempOutputTensor(node, kOutputTensor);
-  const TfLiteTensor* input = AllocateTempInputTensor(node, kInputTensor);
-  const TfLiteTensor* filter = AllocateTempInputTensor(node, kFilterTensor);
-  const TfLiteTensor* bias =
-      AllocateTempInputTensor(context, node, kBiasTensor);
+  MicroContext* micro_context = GetMicroContext(context);
 
+  TfLiteTensor* output = micro_context->AllocateTempOutputTensor(node, kOutputTensor);
+  const TfLiteTensor* input = micro_context->AllocateTempInputTensor(node, kInputTensor);
+  const TfLiteTensor* filter = micro_context->AllocateTempInputTensor(node, kFilterTensor);
+  const TfLiteTensor* bias = micro_context->AllocateTempInputTensor(node, kBiasTensor);
   const TfLiteType data_type = input->type;
   int width = SizeOfDimension(input, 2);
   int height = SizeOfDimension(input, 1);

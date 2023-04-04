@@ -60,8 +60,6 @@ namespace micro {
 
 #endif
 
-namespace {
-
 #ifdef __Xxy
 
 // Patched by Edge Impulse, ARC GCC fixes

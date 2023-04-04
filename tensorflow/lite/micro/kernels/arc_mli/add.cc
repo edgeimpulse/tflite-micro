@@ -27,6 +27,7 @@ limitations under the License.
 #include "tensorflow/lite/kernels/internal/tensor_ctypes.h"
 #include "tensorflow/lite/kernels/kernel_util.h"
 #include "tensorflow/lite/kernels/op_macros.h"
+#include "edge-impulse-sdk/tensorflow/lite/micro/kernels/add.h"
 #include "tensorflow/lite/micro/kernels/arc_mli/mli_slicers.h"
 #include "tensorflow/lite/micro/kernels/arc_mli/mli_tf_utils.h"
 #include "tensorflow/lite/micro/kernels/arc_mli/scratch_buf_mgr.h"
@@ -357,34 +358,6 @@ TfLiteStatus EvalMLIAddInt8(TfLiteContext* context, TfLiteNode* node,
 void* AddInit(TfLiteContext* context, const char* buffer, size_t length) {
   TFLITE_DCHECK(context->AllocatePersistentBuffer != nullptr);
   return context->AllocatePersistentBuffer(context, sizeof(OpData));
-}
-
-TfLiteStatus AddPrepare(TfLiteContext* context, TfLiteNode* node) {
-  TFLITE_DCHECK(node->user_data != nullptr);
-  TFLITE_DCHECK(node->builtin_data != nullptr);
-
-  MicroContext* micro_context = GetMicroContext(context);
-
-  TfLiteTensor* input1 =
-      micro_context->AllocateTempInputTensor(node, kInputTensor1);
-  TF_LITE_ENSURE(context, input1 != nullptr);
-  TfLiteTensor* input2 =
-      micro_context->AllocateTempInputTensor(node, kInputTensor2);
-  TF_LITE_ENSURE(context, input2 != nullptr);
-  TfLiteTensor* output = AllocateTempOutputTensor(node, kOutputTensor);
-  TF_LITE_ENSURE(context, output != nullptr);
-
-  OpData* data = static_cast<OpData*>(node->user_data);
-  auto* params = reinterpret_cast<TfLiteAddParams*>(node->builtin_data);
-
-  TF_LITE_ENSURE_STATUS(
-      CalculateOpData(context, params, input1, input2, output, data));
-
-  micro_context->DeallocateTempTfLiteTensor(input1);
-  micro_context->DeallocateTempTfLiteTensor(input2);
-  micro_context->DeallocateTempTfLiteTensor(output);
-
-  return kTfLiteOk;
 }
 
 TfLiteStatus AddEval(TfLiteContext* context, TfLiteNode* node) {

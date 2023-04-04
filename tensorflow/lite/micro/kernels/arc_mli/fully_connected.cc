@@ -130,9 +130,8 @@ TfLiteStatus Prepare(TfLiteContext* context, TfLiteNode* node) {
       micro_context->AllocateTempInputTensor(node, kInputTensor);
   TfLiteTensor* filter =
       micro_context->AllocateTempInputTensor(node, kWeightsTensor);
-  TfLiteTensor* bias =
-      micro_context->AllocateTempInputTensor(context, node, kBiasTensor);
-  TfLiteTensor* output = AllocateTempOutputTensor(node, kOutputTensor);
+  TfLiteTensor* bias = micro_context->AllocateTempInputTensor(node, kBiasTensor);
+  TfLiteTensor* output = micro_context->AllocateTempOutputTensor(node, kOutputTensor);
 
   TF_LITE_ENSURE_TYPES_EQ(context, input->type, output->type);
   TF_LITE_ENSURE_MSG(context, input->type == filter->type,
@@ -394,7 +393,8 @@ TfLiteStatus EvalQuantized(TfLiteContext* context, TfLiteNode* node,
       tflite::micro::GetTensorData<uint8_t>(filter),   \
       tflite::micro::GetTensorShape(bias),             \
       tflite::micro::GetTensorData<int32_t>(bias),     \
-      tflite::micro::GetTensorShape(output))
+      tflite::micro::GetTensorShape(output),           \
+      tflite::micro::GetTensorData<uint8_t>(output))
 
   switch (output->type) {
     case kTfLiteUInt8:
@@ -425,6 +425,7 @@ TfLiteStatus EvalQuantized(TfLiteContext* context, TfLiteNode* node,
   MicroPrintf("Node configuration is not supported by ARC MLI Library.");
   return kTfLiteError;
 #endif
+  }
 }
 
 TfLiteStatus EvalFloat(TfLiteContext* context, TfLiteNode* node,

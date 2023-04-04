@@ -12,6 +12,7 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 ==============================================================================*/
+#ifndef TF_LITE_STATIC_MEMORY
 #include "edge-impulse-sdk/tensorflow/lite/kernels/internal/reference/select.h"
 
 #include <stddef.h>
@@ -87,23 +88,32 @@ TfLiteStatus SelectPrepare(TfLiteContext* context, TfLiteNode* node) {
   TF_LITE_ENSURE_EQ(context, NumInputs(node), 3);
   TF_LITE_ENSURE_EQ(context, NumOutputs(node), 1);
 
-  const TfLiteTensor* input_condition;
-  TF_LITE_ENSURE_OK(context, GetInputSafe(context, node, kInputTensorCondition,
-                                          &input_condition));
-  const TfLiteTensor* input_x;
-  TF_LITE_ENSURE_OK(context,
-                    GetInputSafe(context, node, kInputTensorX, &input_x));
-  const TfLiteTensor* input_y;
-  TF_LITE_ENSURE_OK(context,
-                    GetInputSafe(context, node, kInputTensorY, &input_y));
-  TfLiteTensor* output;
-  TF_LITE_ENSURE_OK(context,
-                    GetOutputSafe(context, node, kOutputTensor, &output));
+  MicroContext* micro_context = GetMicroContext(context);
+  TfLiteTensor* input_condition =
+      micro_context->AllocateTempInputTensor(node, kInputTensorCondition);
+
+  TfLiteTensor* input_x =
+      micro_context->AllocateTempInputTensor(node, kInputTensorX);
+
+  TfLiteTensor* input_y =
+      micro_context->AllocateTempInputTensor(node, kInputTensorY);
+
+  TfLiteTensor* output =
+      micro_context->AllocateTempOutputTensor(node, kOutputTensor);
 
   // Input must be bool.
   TF_LITE_ENSURE_TYPES_EQ(context, input_condition->type, kTfLiteBool);
   TF_LITE_ENSURE_TYPES_EQ(context, input_x->type, input_y->type);
   output->type = input_x->type;
+
+  // Respect the original output shape when there are mixed shapes to represent
+  // a scalar data.
+  if (GetTensorShape(input_condition).FlatSize() == 1 &&
+      GetTensorShape(input_x).FlatSize() == 1 &&
+      GetTensorShape(input_y).FlatSize() == 1 &&
+      GetTensorShape(output).FlatSize() == 1) {
+    return kTfLiteOk;
+  }
 
   bool same_shape = HaveSameShapes(input_condition, input_x) &&
                     HaveSameShapes(input_x, input_y);
@@ -126,9 +136,9 @@ TfLiteStatus SelectPrepare(TfLiteContext* context, TfLiteNode* node) {
         break;
       }
       case kVersionTwo: {
-        TF_LITE_ENSURE_OK(context, CalculateShapeForBroadcast(
-                                       context, input_condition, input_x,
-                                       input_y, &output_size));
+        TF_LITE_ENSURE_OK(
+          context, CheckBroadcastShape(context, input_condition, input_x, input_y,
+                                     output->dims));
         data->requires_broadcast = true;
         break;
       }
@@ -138,6 +148,11 @@ TfLiteStatus SelectPrepare(TfLiteContext* context, TfLiteNode* node) {
   } else {
     output_size = TfLiteIntArrayCopy(input_x->dims);
   }
+
+  micro_context->DeallocateTempTfLiteTensor(input_condition);
+  micro_context->DeallocateTempTfLiteTensor(input_x);
+  micro_context->DeallocateTempTfLiteTensor(input_y);
+  micro_context->DeallocateTempTfLiteTensor(output);
 
   return kTfLiteOk;
 }
@@ -217,3 +232,4 @@ TfLiteRegistration Register_SELECT_V2() {
 }
 
 }  // namespace tflite
+#endif // TF_LITE_STATIC_MEMORY
