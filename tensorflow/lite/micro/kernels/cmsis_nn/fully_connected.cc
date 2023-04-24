@@ -371,6 +371,11 @@ TfLiteStatus Eval(TfLiteContext* context, TfLiteNode* node) {
       break;
     }
     case kTfLiteInt16: {
+#if EI_TFLITE_DISABLE_FULLY_CONNECTED_IN_I16
+        MicroPrintf("Filter data type %s currently not supported.",
+                              TfLiteTypeGetName(filter->type));
+        return kTfLiteError;
+#endif
       return EvalQuantizedInt16(context, node, data, input, filter, bias,
                                 output);
     }

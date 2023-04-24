@@ -149,6 +149,11 @@ TfLiteStatus Prepare(TfLiteContext* context, TfLiteNode* node) {
                       data->output_activation_min, data->output_activation_max);
 
   if (input->type == kTfLiteInt8 && data->is_mli_applicable) {
+#if EI_TFLITE_DISABLE_FULLY_CONNECTED_IN_I8
+    TF_LITE_KERNEL_LOG(context, "Type %s (%d) not supported.",
+                    TfLiteTypeGetName(output->type), output->type);
+    return kTfLiteError;
+#endif
     data->mli_in = ops::micro::MliTensorInterface(static_cast<mli_tensor*>(
         context->AllocatePersistentBuffer(context, sizeof(mli_tensor))));
     data->mli_weights = ops::micro::MliTensorInterface(static_cast<mli_tensor*>(
