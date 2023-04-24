@@ -98,10 +98,20 @@ TfLiteStatus Prepare(TfLiteContext* context, TfLiteNode* node) {
   int32_t buf_size = 0;
 
   if (input->type == kTfLiteInt16) {
+#if EI_TFLITE_DISABLE_FULLY_CONNECTED_IN_I16
+        MicroPrintf("Filter data type %s currently not supported.",
+                              TfLiteTypeGetName(input->type));
+        return kTfLiteError;
+#endif
     TF_LITE_ENSURE_EQ(context, input->params.zero_point, 0);
     TF_LITE_ENSURE_EQ(context, output->params.zero_point, 0);
     buf_size = arm_fully_connected_s16_get_buffer_size(&filter_dims);
   } else if (input->type == kTfLiteInt8) {
+#if EI_TFLITE_DISABLE_FULLY_CONNECTED_IN_I8
+        MicroPrintf("Filter data type %s currently not supported.",
+                              TfLiteTypeGetName(input->type));
+        return kTfLiteError;
+#endif
     const RuntimeShape input_shape = GetTensorShape(input);
 
     TFLITE_DCHECK_GE(output_dim_count, 2);

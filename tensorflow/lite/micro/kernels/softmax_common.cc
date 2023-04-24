@@ -88,11 +88,21 @@ TfLiteStatus CalculateSoftmaxParams(TfLiteContext* context,
 
   if (input->type == kTfLiteInt8 || input->type == kTfLiteInt16) {
     if (input->type == kTfLiteInt16) {
+#if EI_TFLITE_DISABLE_SOFTMAX_IN_I16
+      TF_LITE_KERNEL_LOG(context, "Type %s (%d) not supported.",
+                      TfLiteTypeGetName(input->type), input->type);
+      return kTfLiteError;
+#endif
       TF_LITE_ENSURE_EQ(context, input->params.zero_point, 0);
       TF_LITE_ENSURE_EQ(context, output->params.zero_point, 0);
       TF_LITE_ENSURE_NEAR(context, output->params.scale, 1.f / 32768,
                           (0.001f * 1.f / 32768));
     } else {  // input->type == kTfLiteInt8
+#if EI_TFLITE_DISABLE_SOFTMAX_IN_I8
+      TF_LITE_KERNEL_LOG(context, "Type %s (%d) not supported.",
+                      TfLiteTypeGetName(input->type), input->type);
+      return kTfLiteError;
+#endif
       TF_LITE_ENSURE_TYPES_EQ(context, input->type, kTfLiteInt8);
       if (output->type == kTfLiteInt16) {
         TF_LITE_ENSURE_EQ(context, output->params.zero_point, -32768);
@@ -109,6 +119,11 @@ TfLiteStatus CalculateSoftmaxParams(TfLiteContext* context,
 
     // Calculate input_multiplier and input_left_shift
     if (input->type == kTfLiteInt16) {
+#if EI_TFLITE_DISABLE_SOFTMAX_IN_I16
+      TF_LITE_KERNEL_LOG(context, "Type %s (%d) not supported.",
+                      TfLiteTypeGetName(input->type), input->type);
+      return kTfLiteError;
+#endif
       int input_left_shift;
       double input_scale_beta_rescale =
           static_cast<double>(input->params.scale) *
@@ -119,6 +134,11 @@ TfLiteStatus CalculateSoftmaxParams(TfLiteContext* context,
                          &input_left_shift);
       op_data->input_left_shift = input_left_shift;
     } else {
+#if EI_TFLITE_DISABLE_SOFTMAX_IN_I8
+      TF_LITE_KERNEL_LOG(context, "Type %s (%d) not supported.",
+                      TfLiteTypeGetName(input->type), input->type);
+      return kTfLiteError;
+#endif
       int input_left_shift;
       tflite::PreprocessSoftmaxScaling(
           static_cast<double>(params->beta),
@@ -130,6 +150,11 @@ TfLiteStatus CalculateSoftmaxParams(TfLiteContext* context,
                                               op_data->input_left_shift);
     }
   } else {
+#if EI_TFLITE_DISABLE_SOFTMAX_IN_F32
+    TF_LITE_KERNEL_LOG(context, "Type %s (%d) not supported.",
+                    TfLiteTypeGetName(input->type), input->type);
+    return kTfLiteError;
+#endif
     TF_LITE_ENSURE_TYPES_EQ(context, input->type, kTfLiteFloat32);
     TF_LITE_ENSURE_TYPES_EQ(context, output->type, kTfLiteFloat32);
     op_data->beta = static_cast<double>(params->beta);
