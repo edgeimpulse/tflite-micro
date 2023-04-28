@@ -14,14 +14,6 @@ limitations under the License.
 ==============================================================================*/
 #include "tensorflow/lite/kernels/kernel_util.h"
 
-// Patched by Edge Impulse, remove these declarations for Eta Compute
-#ifdef ECM3532
-#undef _GLIBCXX_HAVE_ENOTSUP
-#undef _GLIBCXX_HAVE_ECANCELED
-#undef _GLIBCXX_HAVE_EOWNERDEAD
-#undef _GLIBCXX_HAVE_ENOTRECOVERABLE
-#endif
-
 #include <stdint.h>
 #include <stdlib.h>
 
