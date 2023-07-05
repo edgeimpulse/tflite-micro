@@ -82,9 +82,11 @@ TfLiteStatus CalculateSoftmaxParams(TfLiteContext* context,
                                     TfLiteTensor* output,
                                     const TfLiteSoftmaxParams* params,
                                     SoftmaxParams* op_data) {
+#ifndef EI_TFLITE_DISABLE_SOFTMAX_IN_I16
   if (InitializeLutForInt16(context, input, output, op_data) != kTfLiteOk) {
     return kTfLiteError;
   }
+#endif
 
   if (input->type == kTfLiteInt8 || input->type == kTfLiteInt16) {
     if (input->type == kTfLiteInt16) {

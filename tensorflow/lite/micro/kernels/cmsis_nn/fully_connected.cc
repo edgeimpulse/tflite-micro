@@ -117,6 +117,9 @@ TfLiteStatus Prepare(TfLiteContext* context, TfLiteNode* node) {
     TFLITE_DCHECK_GE(output_dim_count, 2);
     TFLITE_DCHECK_LE(output_dim_count, 4);
 
+#if EI_TFLITE_DISABLE_CONV_2D_IN_I8
+    buf_size = arm_fully_connected_s8_get_buffer_size(&filter_dims);
+#else
     if (output_dim_count > 2 && data->accum_depth % 4 == 0) {
       data->per_channel_output_multiplier =
           static_cast<int32_t*>(context->AllocatePersistentBuffer(
@@ -135,6 +138,7 @@ TfLiteStatus Prepare(TfLiteContext* context, TfLiteNode* node) {
     } else {
       buf_size = arm_fully_connected_s8_get_buffer_size(&filter_dims);
     }
+#endif
   }
 
   if (filter->type == kTfLiteInt4) {
@@ -222,6 +226,24 @@ TfLiteStatus EvalQuantizedInt8(TfLiteContext* context, TfLiteNode* node,
   const int32_t* bias_data =
       tflite::micro::GetOptionalTensorData<int32_t>(bias);
 
+#if EI_TFLITE_DISABLE_CONV_2D_IN_I8
+    cmsis_nn_fc_params fc_params;
+    fc_params.input_offset = -data.reference_op_data.input_zero_point;
+    fc_params.output_offset = data.reference_op_data.output_zero_point;
+    fc_params.filter_offset = 0;
+    fc_params.activation.min = data.reference_op_data.output_activation_min;
+    fc_params.activation.max = data.reference_op_data.output_activation_max;
+
+    TF_LITE_ENSURE_EQ(
+        context,
+        arm_fully_connected_s8(
+            &ctx, &fc_params, &quant_params, &input_dims,
+            tflite::micro::GetTensorData<int8_t>(input), &filter_dims,
+            tflite::micro::GetTensorData<int8_t>(filter), &bias_dims, bias_data,
+            &output_dims, tflite::micro::GetTensorData<int8_t>(output)),
+        ARM_CMSIS_NN_SUCCESS);
+#else
+
   if (output_dim_count > 2 && data.accum_depth % 4 == 0) {
     cmsis_nn_conv_params conv_params;
     conv_params.dilation.h = 1;
@@ -271,6 +293,8 @@ TfLiteStatus EvalQuantizedInt8(TfLiteContext* context, TfLiteNode* node,
             &output_dims, tflite::micro::GetTensorData<int8_t>(output)),
         ARM_CMSIS_NN_SUCCESS);
   }
+#endif
+
   return kTfLiteOk;
 }
 
