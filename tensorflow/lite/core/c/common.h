@@ -169,6 +169,19 @@ void TfLiteFloatArrayFree(TfLiteFloatArray* a);
 // calling the context->ReportError function directly, so that message strings
 // can be stripped out if the binary size needs to be severely optimized.
 #ifndef TF_LITE_STRIP_ERROR_STRINGS
+#ifdef TF_LITE_LOG_FILE_NAME
+#define TF_LITE_KERNEL_LOG(context, ...)            \
+  do {                                              \
+    (context)->ReportError((context), __FILE__ " " __VA_ARGS__); \
+  } while (false)
+
+#define TF_LITE_MAYBE_KERNEL_LOG(context, ...)        \
+  do {                                                \
+    if ((context) != nullptr) {                       \
+      (context)->ReportError((context), __FILE__ " " __VA_ARGS__); \
+    }                                                 \
+  } while (false)
+#else // TF_LITE_LOG_FILE_NAME
 #define TF_LITE_KERNEL_LOG(context, ...)            \
   do {                                              \
     (context)->ReportError((context), __VA_ARGS__); \
@@ -180,6 +193,7 @@ void TfLiteFloatArrayFree(TfLiteFloatArray* a);
       (context)->ReportError((context), __VA_ARGS__); \
     }                                                 \
   } while (false)
+#endif // TF_LITE_LOG_FILE_NAME
 #else  // TF_LITE_STRIP_ERROR_STRINGS
 #define ARGS_UNUSED(...) (void)sizeof(#__VA_ARGS__)
 #define TF_LITE_KERNEL_LOG(context, ...) ARGS_UNUSED(__VA_ARGS__)

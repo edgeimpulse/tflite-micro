@@ -97,6 +97,7 @@ AllOpsResolver::AllOpsResolver() {
   AddReshape();
   AddResizeBilinear();
   AddResizeNearestNeighbor();
+  AddRfft2D();
   AddRound();
   AddRsqrt();
 #ifndef TF_LITE_STATIC_MEMORY

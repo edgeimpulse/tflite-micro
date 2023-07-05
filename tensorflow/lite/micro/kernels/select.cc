@@ -13,16 +13,16 @@ See the License for the specific language governing permissions and
 limitations under the License.
 ==============================================================================*/
 #ifndef TF_LITE_STATIC_MEMORY
-#include "edge-impulse-sdk/tensorflow/lite/kernels/internal/reference/select.h"
+#include "tensorflow/lite/kernels/internal/reference/select.h"
 
 #include <stddef.h>
 #include <stdint.h>
 
-#include "edge-impulse-sdk/tensorflow/lite/c/common.h"
-#include "edge-impulse-sdk/tensorflow/lite/kernels/internal/tensor_ctypes.h"
-#include "edge-impulse-sdk/tensorflow/lite/kernels/kernel_util.h"
-#include "edge-impulse-sdk/tensorflow/lite/micro/kernels/kernel_util.h"
-#include "edge-impulse-sdk/tensorflow/lite/micro/micro_log.h"
+#include "tensorflow/lite/c/common.h"
+#include "tensorflow/lite/kernels/internal/tensor_ctypes.h"
+#include "tensorflow/lite/kernels/kernel_util.h"
+#include "tensorflow/lite/micro/kernels/kernel_util.h"
+#include "tensorflow/lite/micro/micro_log.h"
 
 namespace tflite {
 
@@ -154,64 +154,67 @@ TfLiteStatus SelectPrepare(TfLiteContext* context, TfLiteNode* node) {
   micro_context->DeallocateTempTfLiteTensor(input_y);
   micro_context->DeallocateTempTfLiteTensor(output);
 
+  TfLiteIntArrayFree(output_size);
+
   return kTfLiteOk;
+}
+
+template <typename T>
+void CallSelect(const TfLiteEvalTensor* input_condition,
+                const TfLiteEvalTensor* input_x,
+                const TfLiteEvalTensor* input_y, TfLiteEvalTensor* output,
+                bool need_broadcast) {
+  using Func = decltype(reference_ops::Select<bool, T>)*;
+  Func select_func;
+  if (need_broadcast) {
+    select_func = reference_ops::BroadcastSelect5DSlow<bool, T>;
+  } else {
+    select_func = reference_ops::Select<bool, T>;
+  }
+
+  select_func(tflite::micro::GetTensorShape(input_condition),
+              tflite::micro::GetTensorData<bool>(input_condition),
+              tflite::micro::GetTensorShape(input_x),
+              tflite::micro::GetTensorData<T>(input_x),
+              tflite::micro::GetTensorShape(input_y),
+              tflite::micro::GetTensorData<T>(input_y),
+              tflite::micro::GetTensorShape(output),
+              tflite::micro::GetTensorData<T>(output));
 }
 
 TfLiteStatus SelectEval(TfLiteContext* context, TfLiteNode* node) {
   OpData* data = static_cast<OpData*>(node->user_data);
-  MicroContext* micro_context = GetMicroContext(context);
 
-  TfLiteTensor* input_condition =
-      micro_context->AllocateTempInputTensor(node, kInputTensorCondition);
+  const TfLiteEvalTensor* input_condition =
+      tflite::micro::GetEvalInput(context, node, kInputTensorX);
 
-  TfLiteTensor* input_x =
-      micro_context->AllocateTempInputTensor(node, kInputTensorX);
+  const TfLiteEvalTensor* input_x =
+      tflite::micro::GetEvalInput(context, node, kInputTensorY);
 
-  TfLiteTensor* input_y =
-      micro_context->AllocateTempInputTensor(node, kInputTensorY);
+  const TfLiteEvalTensor* input_y =
+      tflite::micro::GetEvalInput(context, node, kInputTensorCondition);
 
-  TfLiteTensor* output =
-      micro_context->AllocateTempOutputTensor(node, kOutputTensor);
+  TfLiteEvalTensor* output =
+      tflite::micro::GetEvalOutput(context, node, kOutputTensor);
 
-#define TF_LITE_SELECT(type, op)                                           \
-  reference_ops::op(GetTensorShape(input_condition),                       \
-                    GetTensorData<bool>(input_condition),                  \
-                    GetTensorShape(input_x), GetTensorData<type>(input_x), \
-                    GetTensorShape(input_y), GetTensorData<type>(input_y), \
-                    GetTensorShape(output), GetTensorData<type>(output));
-
-#define TF_LITE_SWITCH(type, op)                                     \
-  switch (type) {                                                    \
-    case kTfLiteFloat32:                                             \
-      TF_LITE_SELECT(float, op);                                     \
-      break;                                                         \
-    case kTfLiteInt8:                                                \
-      TF_LITE_SELECT(int8_t, op);                                    \
-      break;                                                         \
-    case kTfLiteInt16:                                               \
-      TF_LITE_SELECT(int16_t, op);                                   \
-      break;                                                         \
-    default:                                                         \
-      MicroPrintf("Does not support type other than %s, but got %s", \
-                  "int8|int16|float32", TfLiteTypeGetName(type));    \
-      return kTfLiteError;                                           \
+  switch (input_x->type) {
+    case kTfLiteFloat32:
+      CallSelect<float>(input_condition, input_x, input_y, output,
+                        data->requires_broadcast);
+      break;
+    case kTfLiteInt8:
+      CallSelect<int8_t>(input_condition, input_x, input_y, output,
+                         data->requires_broadcast);
+      break;
+    case kTfLiteInt16:
+      CallSelect<int16_t>(input_condition, input_x, input_y, output,
+                          data->requires_broadcast);
+      break;
+    default:
+      MicroPrintf("Does not support type other than %s, but got %s",
+                  "int8|int16|float32", TfLiteTypeGetName(input_x->type));
+      return kTfLiteError;
   }
-
-  if (data->has_low_rank_input_condition) {
-    MicroPrintf("Not yet implemented.");
-    return kTfLiteError;
-  } else if (data->requires_broadcast) {
-    TF_LITE_SWITCH(input_x->type, BroadcastSelect5DSlow);
-  } else {
-    TF_LITE_SWITCH(input_x->type, Select);
-  }
-
-#undef TF_LITE_SELECT
-#undef TF_LITE_SWITCH
-  micro_context->DeallocateTempTfLiteTensor(input_condition);
-  micro_context->DeallocateTempTfLiteTensor(input_x);
-  micro_context->DeallocateTempTfLiteTensor(input_y);
-  micro_context->DeallocateTempTfLiteTensor(output);
 
   return kTfLiteOk;
 }

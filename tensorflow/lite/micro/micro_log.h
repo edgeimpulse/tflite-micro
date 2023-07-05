@@ -17,8 +17,10 @@ limitations under the License.
 
 #include <cstdarg>
 
-// do this by default
+// do this by default except when running EON compiler
+#ifndef EON_COMPILER_RUN
 #define TF_LITE_STRIP_ERROR_STRINGS
+#endif
 
 // This is a free function used to perform the actual logging.
 // This function will be used by MicroPrintf and MicroErrorReporter::Report()
